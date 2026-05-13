@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formula Compliance Check — Ashwanova</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --dark:    #0E110D;
+  --green:   #1A3C2E;
+  --green2:  #224D3A;
+  --cream:   #F5F2EC;
+  --gold:    #B8A96A;
+  --gold2:   #D4C27A;
+  --red:     #C0392B;
+  --amber:   #C17F24;
+  --ok:      #2D7D5A;
+  --dimtext: #8ABAA0;
+  --muted:   #4A6A58;
+  --serif:   'Playfair Display', Georgia, serif;
+  --sans:    'DM Sans', sans-serif;
+}
+
+html, body {
+  background: var(--dark);
+  font-family: var(--sans);
+  min-height: 100vh;
+  color: var(--cream);
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND ── */
+.bg-layer {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 50% at 80% 20%, rgba(26,60,46,0.25) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 60% at 10% 80%, rgba(184,169,106,0.06) 0%, transparent 60%),
+    var(--dark);
+}
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ── WRAPPER ── */
+.shell {
+  position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 40px 20px 80px;
+}
+
+/* ── HEADER ── */
+.top-bar {
+  width: 100%; max-width: 680px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 48px;
+}
+.logo {
+  font-family: var(--serif);
+  font-size: 18px; font-weight: 900;
+  letter-spacing: -0.01em;
+  color: var(--cream);
+}
+.logo span { color: var(--gold); }
+.fssai-tag {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--red);
+  border: 0.5px solid rgba(192,57,43,0.4);
+  background: rgba(192,57,43,0.07);
+  border-radius: 3px;
+  padding: 4px 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.fssai-tag::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--red);
+  animation: blink 1.4s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* ── INTRO SCREEN ── */
+.intro {
+  max-width: 600px; width: 100%;
+  text-align: center;
+  animation: fadeUp 0.6s ease forwards;
+}
+.intro .eyebrow {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 20px;
+}
+.intro h1 {
+  font-family: var(--serif);
+  font-size: clamp(32px, 6vw, 52px);
+  font-weight: 900; line-height: 1.12;
+  letter-spacing: -0.025em;
+  margin-bottom: 20px;
+}
+.intro h1 em { font-style: italic; color: var(--gold); }
+.intro p {
+  font-size: 16px; font-weight: 300;
+  line-height: 1.7; color: var(--dimtext);
+  margin-bottom: 36px;
+}
+.intro .meta-row {
+  display: flex; justify-content: center; gap: 28px;
+  margin-bottom: 40px;
+}
+.intro .meta-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.intro .meta-num {
+  font-family: var(--serif);
+  font-size: 28px; font-weight: 900;
+  color: var(--gold);
+}
+.intro .meta-lbl {
+  font-size: 11px; font-weight: 400;
+  color: var(--muted); letter-spacing: 0.08em;
+}
+
+/* ── BUTTONS ── */
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--gold);
+  color: var(--dark);
+  font-family: var(--sans);
+  font-size: 14px; font-weight: 500;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 14px 32px;
+  border-radius: 4px; border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
+.btn-primary .arr { font-size: 16px; }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent;
+  color: var(--dimtext);
+  font-family: var(--sans);
+  font-size: 13px; font-weight: 400;
+  letter-spacing: 0.05em;
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: 0.5px solid rgba(138,186,160,0.25);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  margin-top: 16px;
+}
+.btn-ghost:hover { border-color: var(--dimtext); color: var(--cream); }
+
+/* ── PROGRESS BAR ── */
+.progress-wrap {
+  width: 100%; max-width: 600px;
+  margin-bottom: 36px;
+}
+.progress-meta {
+  display: flex; justify-content: space-between;
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.progress-track {
+  height: 3px; background: rgba(255,255,255,0.07);
+  border-radius: 2px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: var(--gold);
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── SCORE BAR ── */
+.score-strip {
+  width: 100%; max-width: 600px;
+  display: flex; gap: 4px;
+  margin-bottom: 32px;
+}
+.score-pip {
+  flex: 1; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.07);
+  transition: background 0.4s ease;
+}
+.score-pip.green { background: var(--ok); }
+.score-pip.amber { background: var(--amber); }
+.score-pip.red   { background: var(--red); }
+
+/* ── QUESTION CARD ── */
+.q-card {
+  width: 100%; max-width: 600px;
+  animation: fadeUp 0.45s ease forwards;
+}
+.q-card .q-num {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 14px;
+}
+.q-card .q-text {
+  font-family: var(--serif);
+  font-size: clamp(20px, 3.5vw, 28px);
+  font-weight: 700; line-height: 1.25;
+  letter-spacing: -0.015em;
+  margin-bottom: 10px;
+}
+.q-card .q-sub {
+  font-size: 13px; font-weight: 300;
+  color: var(--dimtext); line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+/* ── OPTIONS ── */
+.options { display: flex; flex-direction: column; gap: 10px; }
+
+.opt {
+  display: flex; align-items: center; gap: 16px;
+  background: rgba(255,255,255,0.03);
+  border: 0.5px solid rgba(255,255,255,0.09);
+  border-radius: 8px;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  position: relative; overflow: hidden;
+}
+.opt:hover {
+  border-color: rgba(184,169,106,0.4);
+  background: rgba(184,169,106,0.05);
+  transform: translateX(4px);
+}
+.opt.selected-good {
+  border-color: var(--ok);
+  background: rgba(45,125,90,0.12);
+}
+.opt.selected-warn {
+  border-color: var(--amber);
+  background: rgba(193,127,36,0.12);
+}
+.opt.selected-bad {
+  border-color: var(--red);
+  background: rgba(192,57,43,0.12);
+}
+.opt.selected-neutral {
+  border-color: var(--muted);
+  background: rgba(74,106,88,0.12);
+}
+.opt.disabled { pointer-events: none; opacity: 0.45; }
+
+.opt-key {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border-radius: 50%;
+  border: 0.5px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500;
+  color: var(--muted); letter-spacing: 0;
+  transition: all 0.2s;
+}
+.opt:hover .opt-key { border-color: var(--gold); color: var(--gold); }
+.opt.selected-good .opt-key { background: var(--ok); border-color: var(--ok); color: #fff; }
+.opt.selected-warn .opt-key { background: var(--amber); border-color: var(--amber); color: #fff; }
+.opt.selected-bad  .opt-key { background: var(--red); border-color: var(--red); color: #fff; }
+.opt.selected-neutral .opt-key { background: var(--muted); border-color: var(--muted); color: #fff; }
+
+.opt-text {
+  font-size: 15px; font-weight: 400;
+  color: var(--cream); line-height: 1.4;
+  flex: 1;
+}
+.opt-note {
+  font-size: 11px; font-weight: 300;
+  color: var(--dimtext);
+  display: block; margin-top: 3px;
+}
+.opt-badge {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 3px;
+  flex-shrink: 0;
+}
+.badge-green { background: rgba(45,125,90,0.2); color: #5DC990; border: 0.5px solid rgba(45,125,90,0.3); }
+.badge-amber { background: rgba(193,127,36,0.2); color: #DBA040; border: 0.5px solid rgba(193,127,36,0.3); }
+.badge-red   { background: rgba(192,57,43,0.2);  color: #E06050; border: 0.5px solid rgba(192,57,43,0.3); }
+.badge-grey  { background: rgba(74,106,88,0.2);  color: var(--dimtext); border: 0.5px solid rgba(74,106,88,0.3); }
+
+/* ── INSIGHT BOX ── */
+.insight-box {
+  margin-top: 20px;
+  border-radius: 8px;
+  padding: 16px 20px;
+  font-size: 13px; font-weight: 300;
+  line-height: 1.6;
+  animation: fadeUp 0.35s ease forwards;
+  display: none;
+}
+.insight-box.show { display: block; }
+.insight-box.green { background: rgba(45,125,90,0.1); border: 0.5px solid rgba(45,125,90,0.25); color: #7ADAA8; }
+.insight-box.amber { background: rgba(193,127,36,0.1); border: 0.5px solid rgba(193,127,36,0.25); color: #DBA040; }
+.insight-box.red   { background: rgba(192,57,43,0.1);  border: 0.5px solid rgba(192,57,43,0.25); color: #E08070; }
+.insight-box.neutral { background: rgba(74,106,88,0.1); border: 0.5px solid rgba(74,106,88,0.25); color: var(--dimtext); }
+.insight-box strong { font-weight: 500; }
+
+.next-btn-wrap { margin-top: 28px; display: none; }
+.next-btn-wrap.show { display: block; }
+
+/* ── RESULTS SCREEN ── */
+.results {
+  width: 100%; max-width: 600px;
+  animation: fadeUp 0.6s ease forwards;
+  display: none;
+}
+.results.show { display: block; }
+
+.result-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.result-icon {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+  margin: 0 auto 20px;
+}
+.result-icon.red-icon    { background: rgba(192,57,43,0.15); border: 0.5px solid rgba(192,57,43,0.3); }
+.result-icon.amber-icon  { background: rgba(193,127,36,0.15); border: 0.5px solid rgba(193,127,36,0.3); }
+.result-icon.green-icon  { background: rgba(45,125,90,0.15);  border: 0.5px solid rgba(45,125,90,0.3); }
+
+.result-rating {
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.result-rating.red   { color: #E06050; }
+.result-rating.amber { color: #DBA040; }
+.result-rating.green { color: #5DC990; }
+
+.result-headline {
+  font-family: var(--serif);
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 900; line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 14px;
+}
+.result-sub {
+  font-size: 15px; font-weight: 300;
+  color: var(--dimtext); line-height: 1.7;
+}
+
+/* ── SCORE CARD ── */
+.score-card {
+  background: rgba(255,255,255,0.03);
+  border: 0.5px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+.score-card .sc-label {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 16px;
+}
+.score-row {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 0.5px solid rgba(255,255,255,0.05);
+}
+.score-row:last-child { border-bottom: none; }
+.score-row .sr-q {
+  font-size: 13px; font-weight: 400;
+  color: var(--dimtext); flex: 1;
+}
+.score-row .sr-v {
+  font-size: 12px; font-weight: 500;
+  padding: 3px 10px; border-radius: 3px;
+  margin-left: 12px;
+}
+.sr-green { background: rgba(45,125,90,0.2); color: #5DC990; }
+.sr-amber { background: rgba(193,127,36,0.2); color: #DBA040; }
+.sr-red   { background: rgba(192,57,43,0.2); color: #E06050; }
+.sr-grey  { background: rgba(74,106,88,0.15); color: var(--dimtext); }
+
+/* ── COMPLIANCE METER ── */
+.meter-wrap {
+  background: rgba(255,255,255,0.03);
+  border: 0.5px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.meter-wrap .sc-label {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 20px;
+}
+.meter-arc {
+  position: relative;
+  width: 160px; height: 80px;
+  margin: 0 auto 16px;
+}
+.meter-arc svg { width: 160px; height: 80px; overflow: visible; }
+.meter-score-num {
+  font-family: var(--serif);
+  font-size: 32px; font-weight: 900;
+  margin-bottom: 4px;
+}
+.meter-score-lbl {
+  font-size: 12px; font-weight: 400;
+  color: var(--dimtext);
+}
+
+/* ── CTA BLOCK ── */
+.cta-block {
+  background: linear-gradient(135deg, rgba(26,60,46,0.5) 0%, rgba(14,17,13,0.8) 100%);
+  border: 0.5px solid rgba(184,169,106,0.2);
+  border-radius: 10px;
+  padding: 28px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.cta-block h3 {
+  font-family: var(--serif);
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 10px;
+}
+.cta-block p {
+  font-size: 14px; font-weight: 300;
+  color: var(--dimtext); line-height: 1.6;
+  margin-bottom: 24px;
+}
+.cta-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ── EMAIL CAPTURE ── */
+.email-block {
+  background: rgba(255,255,255,0.03);
+  border: 0.5px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+}
+.email-block .sc-label {
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 14px;
+}
+.email-block p {
+  font-size: 14px; font-weight: 300;
+  color: var(--dimtext); line-height: 1.6;
+  margin-bottom: 18px;
+}
+.email-row { display: flex; gap: 10px; }
+.email-input {
+  flex: 1;
+  background: rgba(255,255,255,0.05);
+  border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: 4px;
+  color: var(--cream);
+  font-family: var(--sans);
+  font-size: 14px; font-weight: 300;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.email-input::placeholder { color: var(--muted); }
+.email-input:focus { border-color: var(--gold); }
+.btn-submit {
+  background: var(--gold);
+  color: var(--dark);
+  font-family: var(--sans);
+  font-size: 13px; font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 12px 20px;
+  border-radius: 4px; border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.btn-submit:hover { background: var(--gold2); }
+.email-sent {
+  display: none;
+  font-size: 14px; color: #5DC990;
+  font-weight: 300;
+  margin-top: 10px;
+}
+.email-sent.show { display: block; }
+
+.restart-link {
+  text-align: center;
+  font-size: 12px; color: var(--muted);
+  cursor: pointer; letter-spacing: 0.05em;
+  margin-top: 8px;
+  transition: color 0.2s;
+}
+.restart-link:hover { color: var(--dimtext); }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.screen { display: none; }
+.screen.active { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+/* ── SHIMMER ON LOAD ── */
+.intro { opacity: 0; animation: fadeUp 0.7s 0.1s ease forwards; }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<div class="bg-grid"></div>
+
+<div class="shell">
+
+  <div class="top-bar">
+    <div class="logo">Ashwa<span>nova</span>™</div>
+    <div class="fssai-tag">FSSAI Alert Active</div>
+  </div>
+
+  <!-- ══ INTRO SCREEN ══ -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro">
+      <div class="eyebrow">Formula Compliance Check</div>
+      <h1>Is your ashwagandha<br><em>still compliant?</em></h1>
+      <p>FSSAI has restricted leaf-based ashwagandha in nutraceutical formulations. Answer 5 quick questions and find out exactly where your formula stands — and what to do about it.</p>
+      <div class="meta-row">
+        <div class="meta-item">
+          <div class="meta-num">5</div>
+          <div class="meta-lbl">Questions</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-num">90s</div>
+          <div class="meta-lbl">To Complete</div>
+        </div>
+        <div class="meta-item">
+          <div class="meta-num">3</div>
+          <div class="meta-lbl">Outcomes</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="startGame()">
+        Check My Formula <span class="arr">→</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ QUESTION SCREEN ══ -->
+  <div class="screen" id="screen-question">
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="q-label">Question 1 of 5</span>
+        <span id="q-score-live">Score: 0</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="score-strip" id="score-strip">
+      <div class="score-pip" id="pip-0"></div>
+      <div class="score-pip" id="pip-1"></div>
+      <div class="score-pip" id="pip-2"></div>
+      <div class="score-pip" id="pip-3"></div>
+      <div class="score-pip" id="pip-4"></div>
+    </div>
+
+    <div class="q-card" id="q-card">
+      <!-- dynamically populated -->
+    </div>
+
+  </div>
+
+  <!-- ══ RESULTS SCREEN ══ -->
+  <div class="screen" id="screen-results">
+    <div class="results show" id="results-block">
+      <!-- dynamically populated -->
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── QUESTIONS ──
+const questions = [
+  {
+    id: 0,
+    num: "01 / 05",
+    text: "What part of the ashwagandha plant does your current extract use?",
+    sub: "This is the most critical compliance question following FSSAI's updated guidelines.",
+    options: [
+      { text: "Root only",              note: "Fully aligned with FSSAI guidelines",     badge: "badge-green", level: "good",    points: 2, insight: "<strong>Root-only is the gold standard.</strong> FSSAI's restriction explicitly targets leaf-derived extracts. Root-only formulations are fully compliant and carry no regulatory risk.", color: "green" },
+      { text: "Root + Leaf blend",      note: "Mixed extract — compliance risk",          badge: "badge-amber", level: "warn",    points: 1, insight: "<strong>Blended extracts are at risk.</strong> Any leaf content in your extract now creates a compliance vulnerability under FSSAI's updated guidelines. Reformulation is advised.", color: "amber" },
+      { text: "Leaf extract",           note: "Non-compliant under FSSAI guidelines",     badge: "badge-red",   level: "bad",     points: 0, insight: "<strong>Immediate compliance risk.</strong> Leaf-based ashwagandha is now restricted by FSSAI in nutraceutical formulations. Your current formula is at risk of non-compliance.", color: "red" },
+      { text: "I don't know",           note: "Supply chain transparency gap",            badge: "badge-grey",  level: "neutral", points: 0, insight: "<strong>Not knowing is itself a risk signal.</strong> If you can't confirm plant part used, your supplier's CoA needs urgent review. FSSAI compliance requires documented root-only sourcing.", color: "neutral" }
+    ]
+  },
+  {
+    id: 1,
+    num: "02 / 05",
+    text: "Is your withanolide content standardised to USP specifications?",
+    sub: "USP standardisation defines the quality and consistency benchmark for withanolide content.",
+    options: [
+      { text: "Yes — standardised to ≥4% USP withanolides", note: "Full USP compliance",                    badge: "badge-green", level: "good",    points: 2, insight: "<strong>USP standardisation is the benchmark.</strong> ≥4% total withanolides covering 10 USP bioactives, verified via LC-MS/MS, gives brands the strongest claim foundation.", color: "green" },
+      { text: "Standardised but not to USP spec",           note: "Partial quality signal",                 badge: "badge-amber", level: "warn",    points: 1, insight: "<strong>Non-USP standardisation creates claim gaps.</strong> Regulators and sophisticated buyers increasingly expect USP as the quality baseline. This may limit your market access.", color: "amber" },
+      { text: "No standardisation",                         note: "Significant quality gap",                badge: "badge-red",   level: "bad",     points: 0, insight: "<strong>Unstandardised extracts carry serious risk.</strong> Without USP standardisation, batch-to-batch consistency is unverifiable — undermining clinical claims and buyer confidence.", color: "red" },
+      { text: "Not sure",                                   note: "Supplier verification needed",           badge: "badge-grey",  level: "neutral", points: 0, insight: "<strong>Confirm with your supplier immediately.</strong> USP standardisation must be documented in your CoA. If it's not listed, it probably isn't there.", color: "neutral" }
+    ]
+  },
+  {
+    id: 2,
+    num: "03 / 05",
+    text: "Has your current extract been independently third-party tested?",
+    sub: "Third-party testing is the credibility signal that brand owners cannot self-certify.",
+    options: [
+      { text: "Yes — tested by Eurofins or equivalent accredited lab", note: "Gold standard verification",    badge: "badge-green", level: "good",    points: 2, insight: "<strong>Eurofins-level testing is the credibility benchmark.</strong> Accredited third-party testing removes the conflict of interest that comes with supplier self-certification.", color: "green" },
+      { text: "Yes — internal quality testing only",                   note: "Supplier-only — trust gap",    badge: "badge-amber", level: "warn",    points: 1, insight: "<strong>Internal testing has a conflict of interest problem.</strong> Sophisticated buyers and regulators increasingly require third-party verification. This will be questioned.", color: "amber" },
+      { text: "No third-party testing",                                note: "Critical credibility gap",     badge: "badge-red",   level: "bad",     points: 0, insight: "<strong>No third-party testing is a significant liability.</strong> In a post-FSSAI environment, brands are under greater scrutiny. The absence of independent verification will surface.", color: "red" },
+      { text: "I'm not sure",                                          note: "Supplier check required",      badge: "badge-grey",  level: "neutral", points: 0, insight: "<strong>If you don't know, your supplier probably doesn't either.</strong> Third-party CoAs from accredited labs should be standard documentation — request them immediately.", color: "neutral" }
+    ]
+  },
+  {
+    id: 3,
+    num: "04 / 05",
+    text: "Do you have pharmacokinetic (PK) data for your ashwagandha extract?",
+    sub: "PK data — showing how withanolides behave in human plasma — is the rarest and most differentiating proof point.",
+    options: [
+      { text: "Yes — published PK study in peer-reviewed journal", note: "Category-leading differentiator",  badge: "badge-green", level: "good",    points: 2, insight: "<strong>Published PK data is extremely rare in this category.</strong> It demonstrates not just that your extract contains withanolides — but that they enter the bloodstream, reach peak levels, and sustain over time.", color: "green" },
+      { text: "Yes — internal PK data, unpublished",              note: "Valuable but not fully credible",  badge: "badge-amber", level: "warn",    points: 1, insight: "<strong>Internal PK data is a start.</strong> But unpublished studies can't be independently verified and carry limited weight with scientific buyers. Publication strengthens the claim significantly.", color: "amber" },
+      { text: "No PK data available",                             note: "Bioavailability unproven",         badge: "badge-red",   level: "bad",     points: 0, insight: "<strong>Without PK data, bioavailability is assumed, not proven.</strong> As the ingredient category matures, brands claiming efficacy without plasma-level evidence will face increasing scrutiny.", color: "red" },
+      { text: "What is PK data?",                                 note: "Education needed",                 badge: "badge-grey",  level: "neutral", points: 0, insight: "<strong>Pharmacokinetic data tracks how an ingredient behaves in human plasma.</strong> For ashwagandha, it answers: do withanolides actually reach the bloodstream? At what levels? For how long? This is the next frontier of ingredient proof.", color: "neutral" }
+    ]
+  },
+  {
+    id: 4,
+    num: "05 / 05",
+    text: "Does your current ashwagandha ingredient have a Clean Label Project certification?",
+    sub: "Consumer trust is increasingly driven by third-party certification — not just brand claims.",
+    options: [
+      { text: "Yes — Clean Label Project Certified",           note: "Consumer trust fully activated",      badge: "badge-green", level: "good",    points: 2, insight: "<strong>Clean Label Project certification is the consumer trust signal.</strong> It tells your end buyer that the product has been independently verified for purity, contaminants, and label accuracy.", color: "green" },
+      { text: "No — but we're considering it",                 note: "Opportunity gap in progress",         badge: "badge-amber", level: "warn",    points: 1, insight: "<strong>Consider prioritising this.</strong> Consumer-facing clean label certifications are increasingly influencing retailer buyer decisions — particularly in premium wellness segments.", color: "amber" },
+      { text: "No — and we haven't considered it",             note: "Consumer trust gap",                  badge: "badge-red",   level: "bad",     points: 0, insight: "<strong>The clean label movement is accelerating.</strong> Without independent certification, your brand's 'clean' claims are unverifiable — an increasingly significant liability in the wellness category.", color: "red" },
+      { text: "We have a different certification",             note: "Partial — depends on the cert",       badge: "badge-grey",  level: "neutral", points: 1, insight: "<strong>Other certifications have value — but specificity matters.</strong> Clean Label Project is the most widely recognised consumer trust signal for supplement ingredients. It's worth adding alongside any existing certs.", color: "neutral" }
+    ]
+  }
+];
+
+// ── STATE ──
+let currentQ  = 0;
+let totalScore = 0;
+let answers    = [];
+let answered   = false;
+
+function startGame() {
+  showScreen('screen-question');
+  renderQuestion(0);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function renderQuestion(idx) {
+  answered = false;
+  const q = questions[idx];
+  const pct = (idx / 5) * 100;
+
+  document.getElementById('q-label').textContent = `Question ${idx + 1} of 5`;
+  document.getElementById('q-score-live').textContent = `Score: ${totalScore}`;
+  document.getElementById('prog-fill').style.width = pct + '%';
+
+  const card = document.getElementById('q-card');
+  card.style.opacity = '0';
+  card.style.transform = 'translateY(12px)';
+
+  let optsHTML = q.options.map((o, i) => `
+    <div class="opt" id="opt-${i}" onclick="selectOption(${idx}, ${i})">
+      <div class="opt-key">${String.fromCharCode(65+i)}</div>
+      <div style="flex:1">
+        <div class="opt-text">${o.text}</div>
+        ${o.note ? `<span class="opt-note">${o.note}</span>` : ''}
+      </div>
+      <div class="opt-badge ${o.badge}">${o.level === 'good' ? 'Compliant' : o.level === 'warn' ? 'At Risk' : o.level === 'bad' ? 'Non-Compliant' : 'Unknown'}</div>
+    </div>
+  `).join('');
+
+  card.innerHTML = `
+    <div class="q-num">${q.num}</div>
+    <div class="q-text">${q.text}</div>
+    <div class="q-sub">${q.sub}</div>
+    <div class="options">${optsHTML}</div>
+    <div class="insight-box" id="insight-box"></div>
+    <div class="next-btn-wrap" id="next-wrap">
+      <button class="btn-primary" onclick="nextQuestion(${idx})">
+        ${idx < 4 ? 'Next Question <span class="arr">→</span>' : 'See My Results <span class="arr">→</span>'}
+      </button>
+      <button class="btn-ghost" onclick="nextQuestion(${idx})">Skip this question</button>
+    </div>
+  `;
+
+  requestAnimationFrame(() => {
+    card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    card.style.opacity = '1';
+    card.style.transform = 'translateY(0)';
+  });
+}
+
+function selectOption(qIdx, oIdx) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[qIdx];
+  const o = q.options[oIdx];
+
+  answers[qIdx] = { question: q.text, answer: o.text, level: o.level, points: o.points };
+  totalScore += o.points;
+
+  // style classes
+  const classMap = { good: 'selected-good', warn: 'selected-warn', bad: 'selected-bad', neutral: 'selected-neutral' };
+  const pipMap   = { good: 'green', warn: 'amber', bad: 'red', neutral: 'amber' };
+
+  document.querySelectorAll('.opt').forEach((el, i) => {
+    if (i === oIdx) el.classList.add(classMap[o.level]);
+    else el.classList.add('disabled');
+  });
+
+  // insight
+  const box = document.getElementById('insight-box');
+  box.innerHTML = o.insight;
+  box.className = `insight-box show ${o.color}`;
+
+  // score pip
+  const pip = document.getElementById(`pip-${qIdx}`);
+  pip.classList.add(pipMap[o.level]);
+
+  // live score
+  document.getElementById('q-score-live').textContent = `Score: ${totalScore}`;
+
+  // show next
+  document.getElementById('next-wrap').classList.add('show');
+}
+
+function nextQuestion(current) {
+  if (current < 4) {
+    currentQ = current + 1;
+    renderQuestion(currentQ);
+  } else {
+    showResults();
+  }
+}
+
+function showResults() {
+  showScreen('screen-results');
+  renderResults();
+}
+
+function renderResults() {
+  const max = 10;
+  const pct = Math.round((totalScore / max) * 100);
+
+  let tier, icon, ratingText, headline, sub, ctaHead, ctaBody, ctaBtn;
+
+  if (totalScore <= 3) {
+    tier       = 'red';
+    icon       = '⚠️';
+    ratingText = 'High Risk';
+    headline   = 'Your formula has significant compliance and efficacy gaps.';
+    sub        = 'With FSSAI\'s new restrictions now in effect, your current ashwagandha formulation carries immediate compliance risk. The 90-day reformulation window is open — but closing.';
+    ctaHead    = 'Act Now. The window is 90 days.';
+    ctaBody    = 'Brands that move to root-only now own the shelf. Ashwanova is ready to ship — root-only, USP standardised, Eurofins tested, PK proven, Clean Label certified.';
+    ctaBtn     = 'Talk to Our Team Today';
+  } else if (totalScore <= 6) {
+    tier       = 'amber';
+    icon       = '🔍';
+    ratingText = 'Partially Compliant';
+    headline   = 'You\'re close — but there are gaps that could expose your brand.';
+    sub        = 'Your formulation meets some of the new standard, but one or more gaps could create compliance or credibility risk. A targeted switch could fully close those gaps and significantly strengthen your clinical story.';
+    ctaHead    = 'Close the gaps before your next run.';
+    ctaBody    = 'Ashwanova fills every gap identified in your assessment — root-only, USP standardised, Eurofins tested, PK-proven, Clean Label certified. Let\'s build the case together.';
+    ctaBtn     = 'Download the Compliance Brief';
+  } else {
+    tier       = 'green';
+    icon       = '✓';
+    ratingText = 'Compliant & Competitive';
+    headline   = 'Your formulation meets the new standard. Now outrun everyone else.';
+    sub        = 'You\'re ahead of most brands right now — but the market is catching up fast. The question shifts from compliance to competitive advantage. Are you getting everything from your ashwagandha?';
+    ctaHead    = 'Compliant is the floor. Exceptional is the ceiling.';
+    ctaBody    = 'Ashwanova\'s sustained release and published PK data can take a compliant formula to a category-defining one. Request a sample and see the difference.';
+    ctaBtn     = 'Request a Sample';
+  }
+
+  // Score rows
+  const qShort = ["Plant part used", "USP standardisation", "Third-party testing", "PK / plasma data", "Clean Label cert"];
+  const scoreRowsHTML = answers.map((a, i) => {
+    if (!a) return `<div class="score-row"><div class="sr-q">${qShort[i]}</div><div class="sr-v sr-grey">Skipped</div></div>`;
+    const cls = a.level === 'good' ? 'sr-green' : a.level === 'warn' ? 'sr-amber' : a.level === 'bad' ? 'sr-red' : 'sr-grey';
+    const label = a.level === 'good' ? 'Compliant' : a.level === 'warn' ? 'At Risk' : a.level === 'bad' ? 'Gap' : 'Unknown';
+    return `<div class="score-row"><div class="sr-q">${qShort[i] || ('Q'+(i+1))}</div><div class="sr-v ${cls}">${label}</div></div>`;
+  }).join('');
+
+  // Arc SVG
+  const arcColor = tier === 'green' ? '#2D7D5A' : tier === 'amber' ? '#C17F24' : '#C0392B';
+  const circumference = Math.PI * 70; // half circle r=70
+  const dashLen = (pct / 100) * circumference;
+
+  document.getElementById('results-block').innerHTML = `
+    <div class="result-header">
+      <div class="result-icon ${tier}-icon">${icon}</div>
+      <div class="result-rating ${tier}">${ratingText} — ${totalScore} / ${max}</div>
+      <div class="result-headline">${headline}</div>
+      <div class="result-sub">${sub}</div>
+    </div>
+
+    <div class="meter-wrap">
+      <div class="sc-label">Compliance Score</div>
+      <div class="meter-arc">
+        <svg viewBox="-10 -10 180 100">
+          <path d="M 0 80 A 80 80 0 0 1 160 80" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M 0 80 A 80 80 0 0 1 160 80" fill="none" stroke="${arcColor}" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="${dashLen} ${circumference}" style="transition: stroke-dasharray 1s cubic-bezier(0.4,0,0.2,1) 0.3s;"/>
+        </svg>
+      </div>
+      <div class="meter-score-num" style="color:${arcColor}">${pct}%</div>
+      <div class="meter-score-lbl">compliance confidence rating</div>
+    </div>
+
+    <div class="score-card">
+      <div class="sc-label">Your Assessment Breakdown</div>
+      ${scoreRowsHTML}
+    </div>
+
+    <div class="cta-block">
+      <h3>${ctaHead}</h3>
+      <p>${ctaBody}</p>
+      <div class="cta-buttons">
+        <button class="btn-primary">${ctaBtn} <span class="arr">→</span></button>
+      </div>
+      <div style="margin-top:16px; font-size:13px; color:var(--muted);">
+        → <a href="mailto:sales@nutriventia.com" style="color:var(--gold); text-decoration:none;">sales@nutriventia.com</a>
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        → <span style="color:var(--gold);">[your-landing-page-url]</span>
+      </div>
+    </div>
+
+    <div class="email-block">
+      <div class="sc-label">Get Your Full Compliance Report</div>
+      <p>We'll email you a personalised PDF with your full assessment, the FSSAI brief, and a reformulation roadmap — no sales pitch, just the facts.</p>
+      <div class="email-row">
+        <input type="email" class="email-input" id="email-input" placeholder="your@company.com">
+        <button class="btn-submit" onclick="submitEmail()">Send Report</button>
+      </div>
+      <div class="email-sent" id="email-sent">✓ Report on its way — check your inbox within 24 hours.</div>
+    </div>
+
+    <div class="restart-link" onclick="restartGame()">↩ Retake the assessment</div>
+  `;
+
+  // Animate arc after paint
+  setTimeout(() => {
+    const arc = document.querySelector('.meter-arc path:last-child');
+    if (arc) arc.style.strokeDasharray = `${dashLen} ${circumference}`;
+  }, 100);
+}
+
+function submitEmail() {
+  const val = document.getElementById('email-input').value;
+  if (!val || !val.includes('@')) {
+    document.getElementById('email-input').style.borderColor = 'var(--red)';
+    return;
+  }
+  document.getElementById('email-sent').classList.add('show');
+  document.getElementById('email-input').style.opacity = '0.4';
+  document.querySelector('.btn-submit').style.opacity = '0.4';
+  document.querySelector('.btn-submit').disabled = true;
+  // In production: POST to sales@nutriventia.com or CRM endpoint
+}
+
+function restartGame() {
+  currentQ = 0; totalScore = 0; answers = [];
+  for (let i = 0; i < 5; i++) {
+    const pip = document.getElementById(`pip-${i}`);
+    if (pip) pip.className = 'score-pip';
+  }
+  showScreen('screen-question');
+  renderQuestion(0);
+}
+</script>
+
+</body>
+</html>
